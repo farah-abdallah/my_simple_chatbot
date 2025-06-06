@@ -10,19 +10,22 @@ load_dotenv()  # takes OPENAI_API_KEY from .env
 
 # 2. Create Flask app
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecret123")  
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecret123")
 # – Flask needs a secret key for sessions/flash messaging. In production, set a real secret in .env.
 
 # 3. Initialize (or lazily initialize) the RAG model
-#    For simplicity, we initialize at startup. You can also delay until first request.
-PDF_PATH = "data/Understanding_Climate_Change.pdf"  # or wherever your PDF lives
+#    For simplicity, we initialize at startup.
+
+# ─── EDIT #1: Instead of a single PDF_PATH, point to the entire data folder:
+DATA_FOLDER = "data"  # ── formerly PDF_PATH = "data/Understanding_Climate_Change.pdf"
+
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", 1000))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", 200))
 N_RETRIEVED = int(os.getenv("N_RETRIEVED", 2))
 
 try:
     rag = SimpleRAG(
-        pdf_path=PDF_PATH,
+        folder_path=DATA_FOLDER,         # ── pass the folder, not a single PDF
         chunk_size=CHUNK_SIZE,
         chunk_overlap=CHUNK_OVERLAP,
         n_retrieved=N_RETRIEVED
@@ -49,12 +52,13 @@ def index():
             flash("RAG model failed to initialize. Check server logs.", "error")
             return redirect(url_for("index"))
 
+        # ─── EDIT #2: Method names changed in SimpleRAG
         # 4a. Retrieve contexts
-        contexts = rag.get_retrieved_contexts(question)
+        contexts = rag.retrieve_contexts(question)   # ── instead of get_retrieved_contexts(...)
 
         # 4b. Call OpenAI chat completion with contexts
         try:
-            answer = rag.ask_chat_completion(question, contexts)
+            answer = rag.answer_with_context(question, contexts)  # ── instead of ask_chat_completion(...)
         except Exception as api_err:
             flash(f"OpenAI API error: {api_err}", "error")
             return redirect(url_for("index"))

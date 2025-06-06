@@ -3,13 +3,13 @@
 import os
 import time
 import requests
-from helper_functions import encode_pdf, retrieve_context_per_question
+from helper_functions import encode_pdf, retrieve_context_per_question, encode_all_data_folder
 
 class SimpleRAG:
     """
     A class to handle PDF chunking, embedding, and retrieval.
     """
-    def __init__(self, pdf_path: str, chunk_size: int = 1000, chunk_overlap: int = 200, n_retrieved: int = 2):
+    def __init__(self, folder_path: str, chunk_size: int = 1000, chunk_overlap: int = 200, n_retrieved: int = 2, model: str="gpt-4"):
         """
         - pdf_path: path to local PDF to index.
         - chunk_size, chunk_overlap: control how large each chunk is and how much overlap.
@@ -19,7 +19,9 @@ class SimpleRAG:
         start_time = time.time()
 
         # Step 1: Encode the PDF with embeddings + FAISS
-        self.vector_store = encode_pdf(pdf_path, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        # New “load all supported file types in data/”
+        self.vector_store = encode_all_data_folder(folder_path, chunk_size=1000, chunk_overlap=200)
+
         self.time_records = {'Chunking': time.time() - start_time}
         print(f"Chunking Time: {self.time_records['Chunking']:.2f} seconds")
 

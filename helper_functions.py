@@ -14,7 +14,7 @@ import textwrap
 import numpy as np
 from enum import Enum
 
-
+#used the same one as in the repo of mentors
 def replace_t_with_space(list_of_documents):
     """
     Replaces all tab characters ('\t') with spaces in the page content of each document
@@ -360,3 +360,86 @@ def get_langchain_embedding_provider(provider: EmbeddingProvider, model_id: str 
         return BedrockEmbeddings(model_id=model_id) if model_id else BedrockEmbeddings(model_id="amazon.titan-embed-text-v2:0")
     else:
         raise ValueError(f"Unsupported embedding provider: {provider}")
+    
+import os
+import csv
+
+def load_txt(path: str) -> str:
+    """
+    Read a UTF-8 text file and return its entire contents as one string.
+    """
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
+
+
+def load_csv(path: str, delimiter: str = ",") -> str:
+    """
+    Read a CSV file and concatenate all rows (cells) into a single text string.
+    """
+    rows_text = []
+    with open(path, newline="", encoding="utf-8") as csvfile:
+        reader = csv.reader(csvfile, delimiter=delimiter)
+        for row in reader:
+            # Join all columns in this row with spaces, then append to rows_text
+            rows_text.append(" ".join(row))
+    return "\n".join(rows_text)
+
+
+def encode_all_data_folder(
+    folder_path: str,
+    chunk_size: int = 1000,
+    chunk_overlap: int = 200
+):
+    """
+    Iterate over every .pdf, .txt, and .csv in `folder_path`, load their text,
+    split each into chunks, and build a single FAISS index from all chunks.
+    """
+    from langchain.document_loaders import PyPDFLoader
+    from langchain.text_splitter import RecursiveCharacterTextSplitter
+    
+    all_chunks = []
+
+    # 1) Handle PDFs
+    for fn in os.listdir(folder_path):
+        if fn.lower().endswith(".pdf"):
+            pdf_path = os.path.join(folder_path, fn)
+            loader = PyPDFLoader(pdf_path)
+            docs = loader.load()
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap,
+                length_function=len
+            )
+            pdf_chunks = splitter.split_documents(docs)
+            all_chunks.extend(replace_t_with_space(pdf_chunks))
+
+    # 2) Handle TXT files
+    for fn in os.listdir(folder_path):
+        if fn.lower().endswith(".txt"):
+            txt_path = os.path.join(folder_path, fn)
+            raw_text = load_txt(txt_path)
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap,
+                length_function=len
+            )
+            txt_chunks = splitter.create_documents([raw_text])
+            all_chunks.extend(replace_t_with_space(txt_chunks))
+
+    # 3) Handle CSV files
+    for fn in os.listdir(folder_path):
+        if fn.lower().endswith(".csv"):
+            csv_path = os.path.join(folder_path, fn)
+            raw_text = load_csv(csv_path)
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap,
+                length_function=len
+            )
+            csv_chunks = splitter.create_documents([raw_text])
+            all_chunks.extend(replace_t_with_space(csv_chunks))
+
+    # 4) Build FAISS index over every chunk
+    embeddings = OpenAIEmbeddings()
+    vectorstore = FAISS.from_documents(all_chunks, embeddings)
+    return vectorstore

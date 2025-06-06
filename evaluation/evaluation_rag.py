@@ -24,28 +24,16 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
-# 09/15/24 kimmeyh Added path where helper functions is located to the path
-# Add the parent directory to the path since we work with notebooks
 import sys
 import os
 
-# 1. Determine the directory this file lives in (evaluation/)
 current_dir = os.path.dirname(os.path.abspath(__file__))
-
-# 2. Jump one level up to project root (…\my_simple_chatbot)
 project_root = os.path.abspath(os.path.join(current_dir, os.pardir))
-
-# 3. Add project_root to sys.path so Python can import helper_functions.py and rag_model.py
 sys.path.append(project_root)
-
-# 4. Now imports will work:
 from helper_functions import create_question_answer_from_context_chain, \
                              answer_question_from_context, \
                              retrieve_context_per_question
 from rag_model import SimpleRAG
-
-# … rest of your evaluation code …
-
 
 
 from helper_functions import (
@@ -84,7 +72,7 @@ def create_deep_eval_test_cases(
         )
     ]
 
-# Define evaluation metrics
+#  evaluation metrics
 correctness_metric = GEval(
     name="Correctness",
     model="gpt-4o",
@@ -139,14 +127,14 @@ def evaluate_rag(retriever, num_questions: int = 5) -> Dict[str, Any]:
     Provide ratings in JSON format:
     """)
     
-    # Create evaluation chain
+    #evaluation chain
     eval_chain = (
         eval_prompt 
         | llm 
         | StrOutputParser()
     )
     
-    # Generate test questions
+    #test questions
     question_gen_prompt = PromptTemplate.from_template(
         "Generate {num_questions} diverse test questions about climate change:"
     )
@@ -154,7 +142,7 @@ def evaluate_rag(retriever, num_questions: int = 5) -> Dict[str, Any]:
     
     questions = question_chain.invoke({"num_questions": num_questions}).split("\n")
     
-    # Evaluate each question
+    # evaluate each question
     results = []
     for question in questions:
         # Get retrieval results
@@ -176,10 +164,8 @@ def evaluate_rag(retriever, num_questions: int = 5) -> Dict[str, Any]:
 
 def calculate_average_scores(results: List[Dict]) -> Dict[str, float]:
     """Calculate average scores across all evaluation results."""
-    # Implementation depends on the exact format of your results
+    # Implementation depends on the exact format of my results
     pass
 
 if __name__ == "__main__":
-    # Add any necessary setup or configuration here
-    # Example: evaluate_rag(your_chunks_query_retriever_function)
     pass
