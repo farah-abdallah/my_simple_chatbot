@@ -1,0 +1,60 @@
+<!-- templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simple RAG Chatbot</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <h1>🗣️ Simple RAG Chatbot</h1>
+
+    <!-- Flash messages (errors) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for category, message in messages %}
+            <li class="flash-{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Chat Form -->
+    <form method="POST" action="{{ url_for('index') }}" class="chat-form">
+      <label for="question">Ask a question:</label>
+      <textarea id="question" name="question" rows="3" placeholder="Type your question here...">{% if question %}{{ question }}{% endif %}</textarea>
+      <button type="submit">Ask</button>
+    </form>
+
+    {% if question and contexts and answer %}
+      <!-- Show the user’s question -->
+      <div class="chat-box">
+        <div class="user-query">
+          <strong>You asked:</strong>
+          <p>{{ question }}</p>
+        </div>
+
+        <!-- Show retrieved contexts -->
+        <div class="contexts">
+          <strong>Retrieved Context(s):</strong>
+          {% for ctx in contexts %}
+            <div class="context-chunk">
+              <pre>{{ ctx }}</pre>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Finally, show the model’s answer -->
+        <div class="model-answer">
+          <strong>Bot’s Answer:</strong>
+          <p>{{ answer }}</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

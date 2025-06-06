@@ -1,0 +1,80 @@
+/* static/styles.css */
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #fafafa;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 800px;
+  margin: 40px auto;
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.chat-form {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+.chat-form label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+.chat-form textarea {
+  resize: vertical;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+.chat-form button {
+  align-self: flex-end;
+  padding: 8px 16px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+.chat-form button:hover {
+  background-color: #0056b3;
+}
+.chat-box {
+  margin-top: 20px;
+  border-top: 1px solid #ddd;
+  padding-top: 20px;
+}
+.user-query, .model-answer, .contexts {
+  margin-bottom: 20px;
+}
+.context-chunk {
+  background: #f5f5f5;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+.flashes {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 20px;
+}
+.flashes li {
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+.flash-error {
+  background-color: #fdecea;
+  color: #b02a37;
+  border: 1px solid #f5c2c7;
+}
